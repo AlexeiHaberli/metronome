@@ -8,7 +8,7 @@ Metrónomo web interactivo desarrollado en React con Web Audio API. Herramienta 
 
 ## 🚀 Demo en vivo
 
-[Ver demo](https://tu-usuario.github.io/metronomo) _(actualiza con tu URL de deployment)_
+[Ver demo](https://metronomo-react.netlify.app)
 
 ## ✨ Funcionalidades v1.0 (Actual)
 
@@ -101,8 +101,8 @@ Metrónomo web interactivo desarrollado en React con Web Audio API. Herramienta 
 
 ### Clonar el repositorio
 ```bash
-git clone https://github.com/tu-usuario/metronomo.git
-cd metronomo
+git clone https://github.com/AlexeiHaberli/metronome.git
+cd metronome
 ```
 
 ### Instalar dependencias
@@ -166,9 +166,9 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 👤 Autor
 
-**Tu Nombre**
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
-- Email: tu-email@ejemplo.com
+**Alexei Haberli**
+- GitHub: [@AlexeiHaberli](https://github.com/AlexeiHaberli)
+- Proyecto: [metronome](https://github.com/AlexeiHaberli/metronome)
 
 ## 🙏 Agradecimientos
 

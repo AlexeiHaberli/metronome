@@ -5,9 +5,17 @@ function App() {
   const [bpm, setBpm] = useState(120)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentBeat, setCurrentBeat] = useState(0)
+  const [timeSignature, setTimeSignature] = useState('4/4')
   
   const intervalRef = useRef(null)
   const audioContextRef = useRef(null)
+  const beatInMeasure = useRef(0)
+
+  // Obtener cantidad de beats según el compás
+  const getBeatsPerMeasure = () => {
+    const [beats] = timeSignature.split('/')
+    return parseInt(beats)
+  }
 
   // Inicializar AudioContext
   useEffect(() => {
@@ -20,18 +28,26 @@ function App() {
   }, [])
 
   // Función para reproducir el sonido del click
-  const playClick = () => {
+  const playClick = (isAccent = false) => {
     const ctx = audioContextRef.current
+    
+    // Reanudar AudioContext si está suspendido (requerido por navegadores)
+    if (ctx.state === 'suspended') {
+      ctx.resume()
+    }
+    
     const oscillator = ctx.createOscillator()
     const gainNode = ctx.createGain()
     
     oscillator.connect(gainNode)
     gainNode.connect(ctx.destination)
     
-    oscillator.frequency.value = 1000
+    // Beat acentuado (primer beat) tiene frecuencia y volumen más alto
+    oscillator.frequency.value = isAccent ? 1200 : 1000
     oscillator.type = 'sine'
     
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime)
+    const volume = isAccent ? 0.5 : 0.3
+    gainNode.gain.setValueAtTime(volume, ctx.currentTime)
     gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1)
     
     oscillator.start(ctx.currentTime)
@@ -42,16 +58,27 @@ function App() {
   useEffect(() => {
     if (isPlaying) {
       const interval = (60 / bpm) * 1000
+      const beatsPerMeasure = getBeatsPerMeasure()
+      beatInMeasure.current = 0
+      
+      // Tocar primer beat inmediatamente al iniciar
+      playClick(true)
+      setCurrentBeat(1)
+      beatInMeasure.current = 1
       
       intervalRef.current = setInterval(() => {
-        playClick()
-        setCurrentBeat(prev => prev + 1)
+        beatInMeasure.current = (beatInMeasure.current % beatsPerMeasure) + 1
+        const isFirstBeat = beatInMeasure.current === 1
+        
+        playClick(isFirstBeat)
+        setCurrentBeat(beatInMeasure.current)
       }, interval)
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
       }
       setCurrentBeat(0)
+      beatInMeasure.current = 0
     }
 
     return () => {
@@ -59,7 +86,7 @@ function App() {
         clearInterval(intervalRef.current)
       }
     }
-  }, [isPlaying, bpm])
+  }, [isPlaying, bpm, timeSignature])
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying)
@@ -71,8 +98,37 @@ function App() {
   }
 
   return (
-    <div className="metronome-container">
+    <>
       <h1>Metrónomo</h1>
+      
+      <div className="metronome-container">
+        <div className="time-signature-selector">
+        <label htmlFor="time-signature">Compás:</label>
+        <select 
+          id="time-signature"
+          value={timeSignature}
+          onChange={(e) => setTimeSignature(e.target.value)}
+          disabled={isPlaying}
+        >
+          <option value="2/4">2/4</option>
+          <option value="3/4">3/4</option>
+          <option value="4/4">4/4</option>
+          <option value="5/4">5/4</option>
+          <option value="6/8">6/8</option>
+          <option value="7/8">7/8</option>
+          <option value="9/8">9/8</option>
+          <option value="10/8">10/8</option>
+        </select>
+      </div>
+
+      <div className="beat-dots-container">
+        {Array.from({ length: getBeatsPerMeasure() }, (_, i) => (
+          <div 
+            key={i}
+            className={`beat-dot ${i + 1 === currentBeat ? 'active' : ''} ${i === 0 ? 'accent' : ''}`}
+          />
+        ))}
+      </div>
       
       <div className="bpm-display">
         <span className="bpm-value">{bpm}</span>
@@ -100,14 +156,8 @@ function App() {
       >
         {isPlaying ? '⏸ Pausar' : '▶ Iniciar'}
       </button>
-
-      {isPlaying && (
-        <div className="beat-indicator">
-          <div className="beat-pulse"></div>
-          <span>Beat: {currentBeat}</span>
-        </div>
-      )}
-    </div>
+      </div>
+    </>
   )
 }
 
