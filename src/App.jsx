@@ -90,13 +90,13 @@ function App() {
       playClick(true, false)
       setCurrentBeat(1)
       beatInMeasure.current = 1
-      subdivisionCount.current = 1
+      subdivisionCount.current = 0
       
       intervalRef.current = setInterval(() => {
         subdivisionCount.current++
         
         // Determinar si es un beat principal o subdivisión
-        const isMainBeat = subdivisionCount.current % subdivisionsPerBeat === 1
+        const isMainBeat = subdivisionCount.current % subdivisionsPerBeat === 0
         
         if (isMainBeat) {
           // Avanzar al siguiente beat
@@ -134,6 +134,52 @@ function App() {
     const newBpm = parseInt(e.target.value)
     setBpm(newBpm)
   }
+
+  const changeBpm = (delta) => {
+    const newBpm = Math.max(40, Math.min(240, bpm + delta))
+    setBpm(newBpm)
+  }
+
+  // Control por teclado
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignorar si el usuario está escribiendo en un input o select
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+        return
+      }
+
+      switch (e.code) {
+        case 'Space':
+          e.preventDefault() // Evitar scroll de la página
+          togglePlay()
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          if (!isPlaying) changeBpm(5)
+          break
+        case 'ArrowDown':
+          e.preventDefault()
+          if (!isPlaying) changeBpm(-5)
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          if (!isPlaying) changeBpm(1)
+          break
+        case 'ArrowLeft':
+          e.preventDefault()
+          if (!isPlaying) changeBpm(-1)
+          break
+        default:
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isPlaying, bpm])
 
   return (
     <>
@@ -211,6 +257,18 @@ function App() {
       >
         {isPlaying ? '⏸ Pausar' : '▶ Iniciar'}
       </button>
+
+      <div className="keyboard-shortcuts">
+        <div className="shortcut-hint">
+          <kbd>Espacio</kbd> Play/Pausa
+        </div>
+        <div className="shortcut-hint">
+          <kbd>↑</kbd><kbd>↓</kbd> ±5 BPM
+        </div>
+        <div className="shortcut-hint">
+          <kbd>←</kbd><kbd>→</kbd> ±1 BPM
+        </div>
+      </div>
       </div>
     </>
   )
