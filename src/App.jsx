@@ -155,19 +155,19 @@ function App() {
           break
         case 'ArrowUp':
           e.preventDefault()
-          if (!isPlaying) changeBpm(5)
+          changeBpm(5)
           break
         case 'ArrowDown':
           e.preventDefault()
-          if (!isPlaying) changeBpm(-5)
+          changeBpm(-5)
           break
         case 'ArrowRight':
           e.preventDefault()
-          if (!isPlaying) changeBpm(1)
+          changeBpm(1)
           break
         case 'ArrowLeft':
           e.preventDefault()
-          if (!isPlaying) changeBpm(-1)
+          changeBpm(-1)
           break
         default:
           break
